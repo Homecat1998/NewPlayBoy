@@ -7,37 +7,63 @@ import java.awt.*;
 
 
 public class Banner extends Item {
-	double radius;
+	P3D position;
+	P3D topvector;
+	P3D sidevector;
+	P3D normal;
+
+	Texture texture;
 	Color color;
-	public Banner(P3D center, double radius, Color color) {
+
+	public Banner(P3D pos, P3D topv, P3D sidev,P3D n, Color color) {
 		super();
-		this.position = center;
-		this.radius = radius;
+		this.position=pos;
+		this.topvector=topv;
+		this.sidevector=sidev;
+		this.normal=n;
 		this.color = color;
-		this.mirror = false;
+		this.texture=null;
+	}
+	public Banner(P3D pos, P3D topv, P3D sidev,P3D n, Texture t) {
+		super();
+		this.position=pos;
+		this.topvector=topv;
+		this.sidevector=sidev;
+		this.normal=n;
+		this.color = null;
+		this.texture=t;
 	}
 	
 	
 	// intersect - returns either intersect object or null if the ray misses
 	public Intersect intersect(Ray ray) {
+		double top=-(ray.position.sub(position).dot(normal));
+		double bottom=ray.direction.dot(normal);
 
-		// see http://en.wikipedia.org/wiki/Ray_tracing_(graphics)
-		
-		P3D v = ray.position.sub(position);
-		double vdotd = v.dot(ray.direction);
-		double insqrt = vdotd*vdotd - (v.dot(v) - radius*radius);
-		if (insqrt < 0.0) return null;
-		
-		double t = -vdotd - Math.sqrt(insqrt);  // we just take the smallest
-		if (t < 0.0) return null;  // only in a positive direction of shooting out from the ray
-		
-		P3D pos = ray.position.add(ray.direction.scale(t));
-		P3D norm = pos.sub(position).normalize();
-		return new Intersect(t, pos, norm, this, color);
+		if (bottom==0.0 ) return null;
+
+		double u=top/bottom;
+
+		P3D hit=ray.position.add(ray.direction.scale(u));
+		P3D W=hit.sub(position);
+
+		if ((W.x <= topvector.x && W.x >= 0) && (W.y < sidevector.y && W.y > 0)){
+			if (texture!=null){
+				double tu=W.x / topvector.x;
+				double tv=W.y / sidevector.y;
+				return new Intersect(u,hit,normal,this,texture.lookup(tu,tv));
+//				return new Intersect(u,hit,normal,this,color);
+			}
+			return new Intersect(u,hit,normal,this,color);
+//			return null;
+		}
+		else {
+			return null;
+		}
 	}
 	
 	public String toString() {
-		return "sphere center : " + position + " radius : " + radius + " color : " + color;
+		return "Banner at : " + position;
 	}
 	
 }

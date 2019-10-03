@@ -5,6 +5,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -31,14 +33,19 @@ public class RayTracer implements ActionListener, Runnable {
 	BufferedImage frames[];
 	int currentframe = 0;
 
+	Texture cgtexture;
 	Timer timer;
 
 	public RayTracer() {
+
 		SwingUtilities.invokeLater(this);
+
+
 	}
 
 	public static void main(String[] args) {
 		RayTracer rt = new RayTracer();
+
 
 	}
 
@@ -83,6 +90,9 @@ public class RayTracer implements ActionListener, Runnable {
 
 		res.add(m = new Sphere(new P3D(14.35, 7.35, 2.0), 11.0, Color.red));
 		m.mirror = true;
+
+		Banner banner;
+		res.add(new Banner(new P3D(-3.0,7.0,0.0), new P3D(6.0,0.0,0.0), new P3D(0.0,1.5,0.0), new P3D(0.0, 0.0, -1.0), new Texture("compgraphicslogo.png")));
 
 		// legs
 		for (int i = 0; i < 10; i++) {
@@ -175,6 +185,8 @@ public class RayTracer implements ActionListener, Runnable {
 
 		View view = new View(new P3D(4.0, 4.0, -20.0), new P3D(-2.0, -2.0, 10.0), new P3D(10.0, 0.0, 2.0),
 				new P3D(0.0, -10.0, 2.0));
+
+
 
 		// generate frames - this may take some time so best done in the background using a worker thread.
 		SwingWorker worker = new SwingWorker<Void, Void>() {
